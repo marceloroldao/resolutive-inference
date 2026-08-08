@@ -23,3 +23,16 @@ def test_invalid_observation_shape_is_rejected() -> None:
 
     with pytest.raises(ValueError, match="observation"):
         model.step(np.array([1.0, 2.0]))
+
+
+def test_non_finite_observation_is_rejected() -> None:
+    model = CompactPro(n_states=2, observation_dim=1)
+
+    with pytest.raises(ValueError, match="finite"):
+        model.step(np.array([np.nan]))
+
+
+def test_statistic_count_is_exact() -> None:
+    model = CompactPro(n_states=3, observation_dim=2)
+
+    assert model.statistic_count == 3 * 3 + 3 * 2 + 3 * 2 + 3

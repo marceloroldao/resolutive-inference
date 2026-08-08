@@ -63,6 +63,8 @@ class CompactPro:
         value = np.asarray(observation, dtype=float)
         if value.shape != (self.observation_dim,):
             raise ValueError("observation has an incompatible shape")
+        if not np.all(np.isfinite(value)):
+            raise ValueError("observation must contain only finite values")
         prior = predict_state(self.posterior, self.transition)
         log_weights = np.log(np.maximum(prior, np.finfo(float).tiny))
         log_weights += gaussian_log_likelihood(value, self.means, self.variances)

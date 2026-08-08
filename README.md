@@ -43,6 +43,16 @@ The command emits machine-readable JSON containing the seed, sequence length,
 state accuracy, negative log likelihood, Brier score, change-detection summary,
 and exact stored-statistic count.
 
+Run the initial known-parameter baseline comparison with:
+
+```bash
+python benchmarks/baselines/run.py --length 1000 --seed 2026
+```
+
+This comparison includes independent Gaussian HMM and Student-t-emission HMM
+filters. It supplies every model with the data-generating parameters and therefore
+tests filtering behavior, not parameter estimation or model-selection quality.
+
 ```python
 import numpy as np
 from resolutive_inference import CompactPro

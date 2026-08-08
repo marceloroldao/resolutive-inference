@@ -1,0 +1,51 @@
+# Resolutive Inference
+
+Resolutive Inference is an experimental, compact engine for sequential inference. The project studies whether deliberately small state-space models can provide interpretable, reproducible baselines for filtering, regime inference, anomaly scoring, and compressed representation of time series.
+
+The project does **not** claim general superiority over neural networks. Neural sequence models can be substantially more expressive and may be the appropriate choice when data, compute, and task complexity justify them. This repository instead investigates a narrower engineering and scientific question: what can be achieved with a small, inspectable inference state and an explicitly controlled statistical budget?
+
+## Research lines
+
+- **Compact-Pro** is the first reference implementation. Its intended operating point is approximately **119 learned parameters or maintained statistics**, depending on the configured state and observation dimensions. The exact count must be reported for every experiment rather than treated as a universal constant.
+- **Compact-Robust** is a future experimental line aimed at heavy-tailed observations, contamination, and distribution shift. The current module is an explicit placeholder and is not presented as a validated method.
+
+## Baselines
+
+Benchmark comparisons will include conventional hidden Markov models (HMMs) and HMMs with Student-t emissions. Comparisons must use matched data splits, clearly documented parameter counts, repeated seeds, and uncertainty estimates. Neural baselines may be added when appropriate, but no comparison should imply a general architectural ranking beyond the evaluated tasks and budgets.
+
+## Layout
+
+```text
+src/resolutive_inference/   Core inference components
+benchmarks/synthetic/       Controlled synthetic benchmarks
+benchmarks/baselines/       HMM and Student-t HMM baselines
+experiments/                Compression, robustness, and validation studies
+tests/                      Automated checks
+docs/                       Architecture, methodology, and benchmark protocol
+results/                    Generated tables and figures (not source evidence)
+examples/                   Minimal usage examples
+```
+
+## Quick start
+
+```bash
+python -m pip install -e .
+python -m pytest
+```
+
+```python
+import numpy as np
+from resolutive_inference import CompactPro
+
+model = CompactPro(n_states=2, observation_dim=1)
+posterior = model.step(np.array([0.25]))
+print(posterior)
+```
+
+## Reproducibility
+
+Every reported result should record the code revision, environment, configuration, random seeds, dataset provenance and checksum, split construction, fitted parameter/statistic count, runtime budget, and evaluation metrics. Experiments should preserve raw per-run measurements and summarize repeated trials with uncertainty intervals. See [the benchmark protocol](docs/benchmark_protocol.md).
+
+## Status
+
+This repository is an early research scaffold. APIs, algorithms, and claims are expected to change as evidence accumulates.

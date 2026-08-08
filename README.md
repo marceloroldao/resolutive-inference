@@ -33,6 +33,16 @@ python -m pip install -e .
 python -m pytest
 ```
 
+Run the initial known-parameter synthetic benchmark with:
+
+```bash
+python benchmarks/synthetic/run.py --length 1000 --seed 2026
+```
+
+The command emits machine-readable JSON containing the seed, sequence length,
+state accuracy, negative log likelihood, Brier score, change-detection summary,
+and exact stored-statistic count.
+
 ```python
 import numpy as np
 from resolutive_inference import CompactPro

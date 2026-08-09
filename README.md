@@ -7,7 +7,7 @@ The project does **not** claim general superiority over neural networks. Neural 
 ## Research lines
 
 - **Compact-Pro** is the first reference implementation. Its intended operating point is approximately **119 learned parameters or maintained statistics**, depending on the configured state and observation dimensions. The exact count must be reported for every experiment rather than treated as a universal constant.
-- **Compact-Robust** is a future experimental line aimed at heavy-tailed observations, contamination, and distribution shift. The current module is an explicit placeholder and is not presented as a validated method.
+- **Compact-Robust** remains an experimental line. The repository now includes a narrow fixed-point Student-t-like emission and streaming Viterbi decoder for controlled Edge experiments; the general `CompactRobust` estimator remains a placeholder and is not presented as validated.
 
 ## Baselines
 
@@ -39,7 +39,15 @@ Run the initial known-parameter synthetic benchmark with:
 python benchmarks/synthetic/run.py --length 1000 --seed 2026
 ```
 
-The command emits machine-readable JSON containing the seed, sequence length,
+Run the reproducible exploratory bounded-backtrace benchmark with:
+
+```bash
+python -m benchmarks.edge.streaming_backtrace
+```
+
+It writes per-seed CSV and an aggregate JSON summary under `results/edge/streaming_backtrace/`. Its memory estimates separate the theoretical Q4 model-value payload, LUT, and decoder buffers; they are not whole-firmware measurements.
+
+The initial benchmark command emits machine-readable JSON containing the seed, sequence length,
 state accuracy, negative log likelihood, Brier score, change-detection summary,
 and exact stored-statistic count.
 
@@ -55,6 +63,10 @@ print(posterior)
 ## Reproducibility
 
 Every reported result should record the code revision, environment, configuration, random seeds, dataset provenance and checksum, split construction, fitted parameter/statistic count, runtime budget, and evaluation metrics. Experiments should preserve raw per-run measurements and summarize repeated trials with uncertainty intervals. See [the benchmark protocol](docs/benchmark_protocol.md).
+
+## Evidence terminology
+
+**Synthetic results** come from controlled generators. **Empirical results** are reserved for independent external datasets with provenance. Synthetic benchmarks are not described as real-world validation.
 
 ## Status
 

@@ -13,6 +13,16 @@ The project does **not** claim general superiority over neural networks. Neural 
 
 Benchmark comparisons will include conventional hidden Markov models (HMMs) and HMMs with Student-t emissions. Comparisons must use matched data splits, clearly documented parameter counts, repeated seeds, and uncertainty estimates. Neural baselines may be added when appropriate, but no comparison should imply a general architectural ranking beyond the evaluated tasks and budgets.
 
+## Relationship to Resolutive Science
+
+`resolutive-science` is the normative source of truth for shared Resolutive Science terminology, notation and scientific-status conventions.
+
+- Resolutive Science repository baseline: `v0.1.1`
+- RSMS compatibility: `1.0-rc.1` — candidate compatibility, subject to re-audit when RSMS 1.0 becomes stable
+- Project governance baseline: `RSPS 1.0-draft`
+
+Resolutive Inference is an independently testable computational project. Resolutive terminology used here is an engineering abstraction unless a direct mathematical dependency on RSMS is explicitly identified. Computational benchmark success does not constitute validation of Resolutive Physics.
+
 ## Layout
 
 ```text
@@ -39,45 +49,43 @@ Run the initial known-parameter synthetic benchmark with:
 python benchmarks/synthetic/run.py --length 1000 --seed 2026
 ```
 
-The command emits machine-readable JSON containing the seed, sequence length,
-state accuracy, negative log likelihood, Brier score, change-detection summary,
-and exact stored-statistic count.
-
-```python
-import numpy as np
-from resolutive_inference import CompactPro
-
-model = CompactPro(n_states=2, observation_dim=1)
-posterior = model.step(np.array([0.25]))
-print(posterior)
-```
+The command emits machine-readable JSON containing the seed, sequence length, state accuracy, negative log likelihood, Brier score, change-detection summary, and exact stored-statistic count.
 
 ## Reproducibility
 
-Every reported result should record the code revision, environment, configuration, random seeds, dataset provenance and checksum, split construction, fitted parameter/statistic count, runtime budget, and evaluation metrics. Experiments should preserve raw per-run measurements and summarize repeated trials with uncertainty intervals. See [the benchmark protocol](docs/benchmark_protocol.md).
+Every reported result should record the code revision, environment, configuration, random seeds, dataset provenance and checksum, split construction, fitted parameter/statistic count, runtime budget, and evaluation metrics. Experiments should preserve raw per-run measurements and summarize repeated trials with uncertainty intervals. See `docs/benchmark_protocol.md`.
 
 ## Status
 
-This repository is an early research scaffold. APIs, algorithms, and claims are expected to change as evidence accumulates.
+**Maturity:** pre-alpha / early research scaffold.
+
+APIs, algorithms, and claims are expected to change as evidence accumulates. This maturity designation should be retained until a reproducible release gate, frozen benchmark protocol and publication-readiness review are completed.
 
 ### Edge reference status
 
-`FixedPointViterbi` is a **hybrid quantized reference**: path scores,
-transition scores, and its LUT are integer-valued, while emission distances
-are still calculated in floating point. It is therefore not yet an
-integer-only fixed-point MCU kernel.
+`FixedPointViterbi` is a **hybrid quantized reference**: path scores, transition scores, and its LUT are integer-valued, while emission distances are still calculated in floating point. It is therefore not yet an integer-only fixed-point MCU kernel.
 
-The current 3-state/1D edge command is only a preliminary streaming and
-bounded-backtrace benchmark. It is not a reproduction of the approximately
-119-value Compact-Robust reference configuration.
+The current 3-state/1D edge command is only a preliminary streaming and bounded-backtrace benchmark. It is not a reproduction of the approximately 119-value Compact-Robust reference configuration.
 
 ### Roadmap
 
-The next implementation milestone is the **Compact-Robust 119-value
-reference**, in this order:
+The next implementation milestone is the **Compact-Robust 119-value reference**, in this order:
 
 1. Q4 quantization;
 2. LUT-128;
 3. bounded backtrace at depths 16, 8, and 4;
 4. integer-only emission calculation; and
 5. a C/C++ MCU kernel.
+
+## Licensing
+
+This repository is source-available for academic, educational and non-commercial research use under `LICENSE`. Commercial use requires separate written authorization or a commercial license from the rights holder. Because commercial use is restricted, the project must not be represented as OSI-approved open-source software.
+
+## Citation
+
+Citation metadata is provided in `CITATION.cff`. Cite the exact commit or future release used.
+
+## Author
+
+Marcelo Roldão Matos  
+ORCID: 0009-0003-6075-4680

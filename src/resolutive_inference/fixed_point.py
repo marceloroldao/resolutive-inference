@@ -15,8 +15,8 @@ class FixedPointViterbi:
     """Hybrid quantized Viterbi reference with bounded backtrace.
 
     Path scores, transition scores, and the emission lookup table are integer
-    arrays.  The squared distance used to choose an emission LUT entry is still
-    calculated in floating point.  Consequently this Python reference is not
+    arrays. The squared distance used to choose an emission LUT entry is still
+    calculated in floating point. Consequently this Python reference is not
     an integer-only fixed-point kernel suitable for an MCU.
     """
 

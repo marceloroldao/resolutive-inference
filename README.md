@@ -61,6 +61,22 @@ Every reported result should record the code revision, environment, configuratio
 
 APIs, algorithms, and claims are expected to change as evidence accumulates. This maturity designation should be retained until a reproducible release gate, frozen benchmark protocol and publication-readiness review are completed.
 
+### Edge reference status
+
+`FixedPointViterbi` is a **hybrid quantized reference**: path scores, transition scores, and its LUT are integer-valued, while emission distances are still calculated in floating point. It is therefore not yet an integer-only fixed-point MCU kernel.
+
+The current 3-state/1D edge command is only a preliminary streaming and bounded-backtrace benchmark. It is not a reproduction of the approximately 119-value Compact-Robust reference configuration.
+
+### Roadmap
+
+The next implementation milestone is the **Compact-Robust 119-value reference**, in this order:
+
+1. Q4 quantization;
+2. LUT-128;
+3. bounded backtrace at depths 16, 8, and 4;
+4. integer-only emission calculation; and
+5. a C/C++ MCU kernel.
+
 ## Licensing
 
 This repository is source-available for academic, educational and non-commercial research use under `LICENSE`. Commercial use requires separate written authorization or a commercial license from the rights holder. Because commercial use is restricted, the project must not be represented as OSI-approved open-source software.

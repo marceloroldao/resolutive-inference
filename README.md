@@ -53,7 +53,7 @@ A repository-native benchmark is provided at:
 python -m benchmarks.edge.integer_lag8
 ```
 
-Independent reconstruction during development showed the integer lag-8 path tracking the hybrid Q4/LUT-128 path very closely on synthetic data; those figures are not treated as repository results until reproduced from a complete checkout.
+During independent reconstruction of the current algorithm, a 20-seed noisy synthetic study produced approximately **95.544%** mean accuracy for the hybrid Q4/LUT-128 lag-8 reference and **95.536%** for the integer lag-8 reference, with **99.728%** mean path agreement. These are development findings, not repository-native benchmark results, until reproduced from a complete checkout.
 
 ## Scientific status
 

@@ -55,21 +55,13 @@ python -m benchmarks.edge.integer_lag8
 
 During independent reconstruction of the current algorithm, a 20-seed noisy synthetic study produced approximately **95.544%** mean accuracy for the hybrid Q4/LUT-128 lag-8 reference and **95.536%** for the integer lag-8 reference, with **99.728%** mean path agreement. These are development findings, not repository-native benchmark results, until reproduced from a complete checkout.
 
-### C++17 integer kernel reference
+### C++17 / ESP32 target path
 
-`cpp/` now contains a dependency-free host reference matching the integer lag-8 contract. The decode path uses fixed-size arrays, integer arithmetic and no heap allocation inside the kernel.
+A dependency-free C++17 fixed-array kernel is available under `cpp/`. The host parity test uses the same deterministic 24-observation vector as the Python integer reference.
 
-The explicit table accounting remains 510 bytes and the algorithmic arrays remain 272 bytes. ABI padding is measured separately: on the development host compiler, `sizeof(IntegerLag8Model)` was 512 bytes and `sizeof(IntegerLag8Kernel)` was 276 bytes, for **788 bytes combined**, excluding caller-owned input/output buffers, stack frames, firmware and platform runtime.
+The first ESP32 target harness is under `cpp/esp32/` and is configured for PlatformIO + Arduino on a generic `esp32dev` board. It performs deterministic parity first and then measures target-side latency with `micros()`, while reporting `sizeof(IntegerLag8Model)` and `sizeof(IntegerLag8Kernel)`.
 
-The deterministic C++ parity fixture was compiled with C++17 and strict warnings and reproduced the expected 24-state path. Host validation can be run with:
-
-```bash
-cmake -S cpp -B cpp/build
-cmake --build cpp/build --parallel
-ctest --test-dir cpp/build --output-on-failure
-```
-
-This is not yet ESP32/STM32 validation; cross-compilation and hardware timing remain separate gates.
+No ESP32 timing, flash, RAM or energy claim is made yet. The current development environment does not provide the ESP32/PlatformIO toolchain, so these measurements remain a target-hardware gate.
 
 ## Scientific status
 
@@ -90,9 +82,11 @@ bounded backtrace 16 / 8 / 4
     ↓
 integer-only runtime reference
     ↓
-C++17 fixed-point kernel
+C/C++ kernel
     ↓
-ESP32 / STM32 benchmark
+ESP32 / STM32 target harness
+    ↓
+target RAM / Flash / latency / energy benchmark
     ↓
 real sensor/control experiment
 ```
@@ -115,6 +109,23 @@ Run tests and lint with:
 ```bash
 python -m pytest
 python -m ruff check .
+```
+
+Host C++ parity:
+
+```bash
+cmake -S cpp -B cpp/build
+cmake --build cpp/build
+ctest --test-dir cpp/build --output-on-failure
+```
+
+ESP32 target harness (when PlatformIO and target hardware are available):
+
+```bash
+cd cpp/esp32
+pio run
+pio run --target upload
+pio device monitor
 ```
 
 ## Resolutive compatibility

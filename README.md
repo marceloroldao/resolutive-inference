@@ -42,7 +42,7 @@ Fixed-lag references evaluate lags 16, 8, and 4, with smaller lags used in stres
 
 - compilation from the Q4 research model may use floating point;
 - observations are pre-quantized to `int16`;
-- runtime emission distance, LUT indexing, transition scoring, and second-order lag-8 decoding use integer arrays/arithmetic;
+- runtime emission distance, LUT indexing, transition scoring, score renormalization, predecessor storage, and second-order lag-8 decoding use integer arrays/arithmetic;
 - float-to-int input conversion is a preprocessing convenience and is explicitly excluded from the integer-runtime claim.
 
 The current accounting target for the lag-8 compiled reference is **510 bytes of persistent integer tables + 272 bytes of algorithmic runtime buffers = 782 bytes of core data**, excluding firmware, stack, allocator/Python overhead, I/O buffers and platform-specific data. This is a reference accounting result, not yet a measured ESP32/STM32 firmware footprint.
@@ -52,6 +52,8 @@ A repository-native benchmark is provided at:
 ```bash
 python -m benchmarks.edge.integer_lag8
 ```
+
+Independent reconstruction during development showed the integer lag-8 path tracking the hybrid Q4/LUT-128 path very closely on synthetic data; those figures are not treated as repository results until reproduced from a complete checkout.
 
 ## Scientific status
 

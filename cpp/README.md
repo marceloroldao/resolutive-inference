@@ -33,6 +33,22 @@ ctest --test-dir cpp/build --output-on-failure
 
 The deterministic parity fixture was generated from the repository Python integer reference. It checks that the C++ kernel recovers the same 24-state path for the compiled fixed-point tables and quantized observations.
 
+## ESP32 target harness
+
+`cpp/esp32/` now contains a PlatformIO + Arduino target harness for a generic `esp32dev` board. It uses the same deterministic 24-observation parity vector and then measures target-side latency with `micros()`.
+
+The harness reports:
+
+- parity PASS/FAIL;
+- `sizeof(IntegerLag8Model)`;
+- `sizeof(IntegerLag8Kernel)`;
+- combined ABI object size;
+- algorithmic core accounting;
+- microseconds per sequence;
+- microseconds per observation.
+
+The current development environment does not include PlatformIO, Arduino CLI, or the Xtensa ESP32 compiler. Therefore no ESP32 cross-compile, flash/RAM, or hardware latency result is claimed yet.
+
 ## Status
 
-Experimental. Passing the host parity fixture is not equivalent to ESP32/STM32 validation. The next gates are cross-compilation, compiler-size reporting, MCU timing and comparison against the Python reference over a larger exported fixture set.
+Experimental. Passing the host parity fixture is not equivalent to ESP32/STM32 validation. The next gates are target compilation, compiler-size reporting, physical-board timing, energy measurement, and comparison against the Python reference over a larger exported fixture set.

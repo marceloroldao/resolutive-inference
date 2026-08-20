@@ -76,13 +76,13 @@ LUT-128
     ↓
 bounded lag 16 / 8 / 4
     ↓
-integer-only lag-8 Python reference
+integer-only lag-8 Python reference  ← current
     ↓
-C/C++ fixed-point kernel
+C/C++ fixed-point kernel             ← next gated step
     ↓
 ESP32 / STM32 measurement
     ↓
 real sensor/control experiment
 ```
 
-The C/C++ port is gated on reproducible validation of the Python integer reference and should preserve the same explicit accounting and fixed-point contract.
+The C/C++ port is gated on reproducible validation of the Python integer reference and should preserve the same explicit accounting and fixed-point contract. GitHub Actions is currently failing before job steps are exposed, so the Python branch remains Draft until CI or an equivalent full-checkout validation is available.

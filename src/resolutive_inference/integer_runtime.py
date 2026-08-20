@@ -151,7 +151,7 @@ class IntegerLag8Decoder:
 
     @property
     def persistent_bytes(self) -> int:
-        """Compiled model bytes used by runtime, excluding Python object overhead."""
+        """Compiled runtime tables: 510 bytes for the default Q4/LUT-128 reference."""
         return int(
             self.emission.persistent_bytes
             + self.initial_costs.nbytes
@@ -162,7 +162,7 @@ class IntegerLag8Decoder:
 
     @property
     def runtime_buffer_bytes(self) -> int:
-        """Two 4x4 int32 score planes plus lag predecessor planes and one emission."""
+        """Score, lag-ring and emission bytes: 272 bytes when lag equals eight."""
         score_bytes = 2 * N_STATES * N_STATES * np.dtype(np.int32).itemsize
         backtrace_bytes = self.lag * N_STATES * N_STATES * np.dtype(np.uint8).itemsize
         emission_bytes = N_STATES * np.dtype(np.int32).itemsize
@@ -246,11 +246,9 @@ class IntegerLag8Decoder:
                 result[index] = state
 
         if np.any(result < 0):
-            # Boundary recovery uses only the current integer path state: no float fallback.
-            missing = np.flatnonzero(result < 0)
-            nearest = int(np.argmin(dp))
-            fallback_state = nearest % N_STATES
-            result[missing] = fallback_state
+            # Boundary fallback stays integer-only and is deterministic.
+            fallback_state = int(np.argmin(dp)) % N_STATES
+            result[result < 0] = fallback_state
         return result.astype(int)
 
     def decode_from_float(self, observations: np.ndarray) -> np.ndarray:

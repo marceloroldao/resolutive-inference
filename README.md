@@ -55,6 +55,22 @@ python -m benchmarks.edge.integer_lag8
 
 During independent reconstruction of the current algorithm, a 20-seed noisy synthetic study produced approximately **95.544%** mean accuracy for the hybrid Q4/LUT-128 lag-8 reference and **95.536%** for the integer lag-8 reference, with **99.728%** mean path agreement. These are development findings, not repository-native benchmark results, until reproduced from a complete checkout.
 
+### C++17 integer kernel reference
+
+`cpp/` now contains a dependency-free host reference matching the integer lag-8 contract. The decode path uses fixed-size arrays, integer arithmetic and no heap allocation inside the kernel.
+
+The explicit table accounting remains 510 bytes and the algorithmic arrays remain 272 bytes. ABI padding is measured separately: on the development host compiler, `sizeof(IntegerLag8Model)` was 512 bytes and `sizeof(IntegerLag8Kernel)` was 276 bytes, for **788 bytes combined**, excluding caller-owned input/output buffers, stack frames, firmware and platform runtime.
+
+The deterministic C++ parity fixture was compiled with C++17 and strict warnings and reproduced the expected 24-state path. Host validation can be run with:
+
+```bash
+cmake -S cpp -B cpp/build
+cmake --build cpp/build --parallel
+ctest --test-dir cpp/build --output-on-failure
+```
+
+This is not yet ESP32/STM32 validation; cross-compilation and hardware timing remain separate gates.
+
 ## Scientific status
 
 Synthetic benchmarks are controlled experiments. They are useful for regression, ablation, quantization error, bounded-memory behavior and stress testing, but they are not real-world validation. External datasets and hardware measurements must be reported separately.
@@ -74,7 +90,7 @@ bounded backtrace 16 / 8 / 4
     ↓
 integer-only runtime reference
     ↓
-C/C++ kernel
+C++17 fixed-point kernel
     ↓
 ESP32 / STM32 benchmark
     ↓

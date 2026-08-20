@@ -25,7 +25,7 @@ def test_integer_runtime_shapes_and_storage() -> None:
     assert runtime.means_q.shape == (4, 7)
     assert runtime.inv_variances_q.shape == (7,)
     assert runtime.lut_values.shape == (128,)
-    assert runtime.persistent_bytes > runtime.lut_values.nbytes
+    assert runtime.persistent_bytes == 338
 
 
 def test_runtime_accepts_only_integer_observations() -> None:
@@ -48,7 +48,9 @@ def test_integer_runtime_is_deterministic() -> None:
 def test_integer_lag8_decoder_uses_bounded_memory() -> None:
     decoder = IntegerLag8Decoder.compile(_q4(), StudentTCostLUT.build(128), lag=8)
     assert decoder.lag == 8
+    assert decoder.persistent_bytes == 510
     assert decoder.runtime_buffer_bytes == 272
+    assert decoder.core_bytes == 782
     assert decoder.core_bytes < 1024
 
 

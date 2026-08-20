@@ -63,6 +63,27 @@ core reference data                 : 782 B
 
 This excludes executable code, stack, allocator/container overhead, Python object overhead, I/O buffers, preprocessing buffers and MCU/platform-specific state. It therefore must not be described as total firmware RAM.
 
+## C++17 kernel
+
+The C++17 implementation mirrors the integer lag-8 contract with fixed-size arrays and no heap allocation inside `decode()`. The deterministic host fixture checks parity against the Python integer reference.
+
+On the development host ABI, `sizeof(IntegerLag8Model)` was 512 bytes and `sizeof(IntegerLag8Kernel)` was 276 bytes, for 788 bytes combined. These values are compiler/ABI dependent and are not MCU measurements.
+
+## ESP32 target gate
+
+`cpp/esp32/` contains the first PlatformIO + Arduino harness for a generic `esp32dev` target. It runs deterministic parity before timing and reports target object sizes plus microseconds per sequence and observation.
+
+The ESP32 gate is passed only after all of the following are recorded from an actual target toolchain/board:
+
+1. successful cross-compilation;
+2. parity PASS;
+3. compiler-reported flash and RAM usage;
+4. target `sizeof` values;
+5. repeated target latency measurements;
+6. exact board, framework, compiler, optimization and clock configuration.
+
+Energy per observation is a separate later measurement and must not be inferred from host timing.
+
 ## Implementation roadmap
 
 ```text
@@ -76,13 +97,15 @@ LUT-128
     ↓
 bounded lag 16 / 8 / 4
     ↓
-integer-only lag-8 Python reference  ← current
+integer-only lag-8 Python reference
     ↓
-C/C++ fixed-point kernel             ← next gated step
+C++17 fixed-point kernel
     ↓
-ESP32 / STM32 measurement
+ESP32 / STM32 target harness        ← current gate
+    ↓
+target RAM / Flash / latency / energy
     ↓
 real sensor/control experiment
 ```
 
-The C/C++ port is gated on reproducible validation of the Python integer reference and should preserve the same explicit accounting and fixed-point contract. GitHub Actions is currently failing before job steps are exposed, so the Python branch remains Draft until CI or an equivalent full-checkout validation is available.
+GitHub Actions is currently failing before job steps are exposed, and the present environment does not include PlatformIO/Arduino/Xtensa toolchains. Therefore the branch remains Draft until CI or equivalent full-checkout validation and target compilation are available.

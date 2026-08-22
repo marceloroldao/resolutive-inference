@@ -14,7 +14,8 @@ authors = [{ name = "Marcelo Roldão Matos" }]
 dependencies = ["numpy>=1.26"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.6"]
+server = ["fastapi>=0.116", "uvicorn[standard]>=0.35"]
+dev = ["pytest>=8", "ruff>=0.6", "httpx>=0.28", "fastapi>=0.116"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

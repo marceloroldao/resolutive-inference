@@ -1,0 +1,37 @@
+{
+  "title": "Resolutive Inference v0.2.0rc1",
+  "description": "Resolutive Inference is an experimental framework for compact, deterministic and auditable sequential inference. Version 0.2.0rc1 is an experimental PC/server release candidate centered on the CompactRobust119 reference model, with four latent states, seven observed features and 119 stored scalar statistics. The release includes floating-point, Q4/LUT-128 and integer lag-8 execution paths, a C++17 reference kernel, a FastAPI REST/WebSocket server, model versioning, stateful sessions, optional persistence, API-key authentication and compiled-engine caching. Controlled synthetic experiments include comparisons with Gaussian HMM and Student-t HMM baselines. These experiments are intended for reproducibility and controlled evaluation and do not establish universal superiority over other inference methods. The primary release target is PC/server. ESP32/MCU support remains experimental. Software is released under the Resolutive Research and Non-Commercial License (RRNCL) 1.0; commercial use requires separate authorization.",
+  "creators": [
+    {
+      "name": "Matos, Marcelo Roldão",
+      "orcid": "0009-0003-6075-4680"
+    }
+  ],
+  "version": "0.2.0rc1",
+  "publication_date": "2026-08-22",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "other-open",
+  "language": "eng",
+  "keywords": [
+    "resolutive inference",
+    "sequential inference",
+    "compact inference",
+    "state estimation",
+    "temporal inference",
+    "Hidden Markov Model",
+    "HMM",
+    "edge computing",
+    "IoT",
+    "robotics",
+    "deterministic inference",
+    "quantized inference"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/marceloroldao/resolutive-inference",
+      "relation": "isSupplementedBy",
+      "scheme": "url"
+    }
+  ]
+}

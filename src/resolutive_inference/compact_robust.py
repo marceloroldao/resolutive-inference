@@ -9,7 +9,7 @@ The implementation is a research reference, not a claim of general superiority a
 not yet an integer-only MCU kernel.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass  # noqa: I001
 
 import numpy as np
 

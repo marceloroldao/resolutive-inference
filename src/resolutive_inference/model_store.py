@@ -117,7 +117,7 @@ class JsonModelStore:
             raise KeyError(f"unknown model version: {model_id}@{selected}")
         payload = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict):
-            raise ValueError("invalid persisted model payload")
+            raise TypeError("invalid persisted model payload")
         return self._deserialize(payload)
 
     def delete_version(self, model_id: str, version: int) -> None:

@@ -50,7 +50,7 @@ def _observations(length: int) -> list[list[float]]:
 
 def _summary(samples_ns: list[int]) -> dict[str, float]:
     ordered = sorted(samples_ns)
-    p95_index = max(0, int(round(0.95 * (len(ordered) - 1))))
+    p95_index = max(0, round(0.95 * (len(ordered) - 1)))
     return {
         "median_us": statistics.median(ordered) / 1_000.0,
         "p95_us": ordered[p95_index] / 1_000.0,

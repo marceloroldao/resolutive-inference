@@ -127,6 +127,10 @@ def run(iterations: int, length: int) -> dict[str, object]:
         response.raise_for_status()
         rest.append(time.perf_counter_ns() - start)
 
+    cache_info_response = client.get("/v1/info")
+    cache_info_response.raise_for_status()
+    engine_cache = cache_info_response.json().get("engine_cache")
+
     ws2_iterations = min(iterations, MAX_SESSION_OBSERVATIONS // 2)
     websocket_2 = _websocket_samples(client, _observations(2), ws2_iterations)
 
@@ -142,6 +146,7 @@ def run(iterations: int, length: int) -> dict[str, object]:
         "precompiled_runtime": _summary(runtime_samples, length),
         "json_serialization": _summary(serialization),
         "rest_roundtrip_current_api": _summary(rest, length),
+        "engine_cache_after_rest": engine_cache,
         "websocket_incremental_2_observations": {
             "iterations": ws2_iterations,
             **_summary(websocket_2, 2),
@@ -152,7 +157,7 @@ def run(iterations: int, length: int) -> dict[str, object]:
             **_summary(websocket_full, length),
         },
         "methodology": {
-            "rest_current_behavior": "integer_lag8 is compiled inside each REST inference call",
+            "rest_current_behavior": "compiled engines are reused through the bounded process-local engine cache",
             "precompiled_runtime": "decoder compiled once; timing includes float-to-int quantization and decode",
             "websocket": "session uses persistent incremental decoder state",
             "transport_scope": "FastAPI TestClient in-process; no real network/TLS/socket deployment latency",

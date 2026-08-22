@@ -79,7 +79,13 @@ The next implementation milestone is the **Compact-Robust 119-value reference**,
 
 ## Licensing
 
-This repository is source-available for academic, educational and non-commercial research use under `LICENSE`. Commercial use requires separate written authorization or a commercial license from the rights holder. Because commercial use is restricted, the project must not be represented as OSI-approved open-source software.
+This repository is **source-available** under the **Resolutive Research and Non-Commercial License (RRNCL) v1.0** in `LICENSE`.
+
+Academic research, scientific research, education, teaching, personal experimentation and other genuinely non-commercial research uses are permitted. Universities, schools, public research institutions, non-profit organizations and NGOs may also use the work under these terms when the use is non-commercial and does not support commercial advantage.
+
+Commercial use is **not granted** by the public license. Use in paid products or services, SaaS, proprietary integrations, consulting deliverables, monetized redistribution, production systems or internal business operations supporting commercial advantage requires separate written commercial authorization from the rights holder.
+
+Because commercial use is restricted, this project must not be represented as OSI-approved open-source software.
 
 ## Citation
 

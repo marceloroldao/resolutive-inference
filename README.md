@@ -1,5 +1,7 @@
 # Resolutive Inference
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22062070.svg)](https://doi.org/10.5281/zenodo.22062070)
+
 **Experimental compact sequential inference for auditable PC/server and Edge research.**
 
 > Release candidate: **0.2.0rc1**. This is an experimental publication candidate, not a stable v1.0 API.
@@ -151,5 +153,7 @@ Because commercial use is restricted, this project is **source-available** and m
 See `LICENSE` for the complete terms.
 
 ## Citation
+
+**DOI:** [10.5281/zenodo.22062070](https://doi.org/10.5281/zenodo.22062070)
 
 See `CITATION.cff`. Cite the exact release or commit used.

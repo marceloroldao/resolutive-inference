@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
@@ -20,6 +19,8 @@ SUPPORTED_ENGINES: list[EngineName] = ["float", "q4_lut128", "integer_lag8"]
 MAX_BATCH_SEQUENCES = 64
 MAX_SEQUENCE_LENGTH = 4096
 MAX_BATCH_OBSERVATIONS = 65536
+API_VERSION = "0.2.0-rc1"
+API_MATURITY = "release-candidate"
 
 
 class ModelPayload(BaseModel):
@@ -172,7 +173,7 @@ def create_app(
 
     app = FastAPI(
         title="Resolutive Inference API",
-        version="0.1.0-dev",
+        version=API_VERSION,
         description="Experimental PC/server API for compact sequential inference.",
     )
     app.state.registry = registry
@@ -185,8 +186,8 @@ def create_app(
     def info() -> dict[str, object]:
         cache = DEFAULT_ENGINE_CACHE.stats()
         return {
-            "api_version": "0.1.0-dev",
-            "maturity": "pre-alpha",
+            "api_version": API_VERSION,
+            "maturity": API_MATURITY,
             "engines": SUPPORTED_ENGINES,
             "persistence": "json-versioned" if isinstance(registry, PersistentRegistry) else "process-memory",
             "engine_cache": {
@@ -317,10 +318,3 @@ def create_app(
 
     return app
 
-
-def _default_app() -> FastAPI:
-    store_path = os.getenv("RESOLUTIVE_MODEL_STORE")
-    return create_app(model_store_path=store_path) if store_path else create_app()
-
-
-app = _default_app()

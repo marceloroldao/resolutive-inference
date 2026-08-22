@@ -1,24 +1,22 @@
 # Resolutive Inference
 
-**Experimental compact sequential inference for auditable Edge research.**
+**Experimental compact sequential inference for auditable PC/server and Edge research.**
 
-> Maturity: **pre-alpha / experimental**. Results are exploratory unless a repository-native benchmark and its configuration are explicitly cited.
+> Release candidate: **0.2.0rc1**. This is an experimental publication candidate, not a stable v1.0 API.
 
 ## Scope
 
-`resolutive-inference` investigates compact sequential models for filtering, latent-regime inference, anomaly-sensitive temporal processing, and resource-constrained Edge deployment. The project emphasizes deterministic experiments, explicit state transitions, small model footprints, quantization, and reproducible comparisons with conventional baselines.
+`resolutive-inference` investigates compact sequential models for filtering, latent-regime inference, anomaly-sensitive temporal processing and resource-constrained deployment. The project emphasizes deterministic experiments, explicit state transitions, small model footprints, quantization and reproducible comparisons with conventional baselines.
 
-This repository does **not** claim that Resolutive Inference generally replaces neural networks or that it is universally superior to HMM, Semi-Markov, or other statistical models.
+The current engineering priority is **PC/server deployment with an independent API**. The API can be used directly by third-party applications, services, robots or IoT systems; it is not tied to a metaverse or any sibling Resolutive project. The ESP32/MCU line remains preserved as an experimental target path but is not the primary release focus.
 
-## Current references
+This repository does **not** claim that Resolutive Inference generally replaces neural networks or that it is universally superior to HMM, Semi-Markov or other statistical models.
 
-### Compact-Pro
-
-`CompactPro` is the initial Gaussian state-space research baseline. It keeps the public API small and separates emissions, transitions, quantization, metrics, and experiment orchestration.
+## Current reference model
 
 ### Compact-Robust 119
 
-The current Edge research branch defines a fixed four-state, seven-feature second-order reference with exactly **119 stored scalar statistics**:
+The current reference fixes four latent states and seven observed features with exactly **119 stored scalar statistics**:
 
 - 28 means;
 - 7 shared variances;
@@ -26,89 +24,88 @@ The current Edge research branch defines a fixed four-state, seven-feature secon
 - 64 second-order transition probabilities;
 - 4 initial probabilities.
 
-Its Q4 payload is **476 bits = 59.5 theoretical bytes**, requiring 60 whole bytes with ideal nibble packing. This number is the quantized payload only; scale/offset metadata, LUTs, runtime buffers, firmware, stack, allocator overhead, input buffers, and platform-specific structures are separate.
+The Q4 payload is **476 bits = 59.5 theoretical bytes**, requiring 60 whole bytes under ideal nibble packing. This is payload accounting only; scale/offset metadata, LUTs, runtime buffers, firmware, stack, I/O and platform overhead are separate.
 
-### Hybrid Q4 + LUT-128
+The project also includes Q4/LUT-128, bounded second-order decoding, integer lag-8 execution, an incremental lag-8 session runtime and a dependency-free C++17 reference kernel.
 
-The Q4 reference may use a 128-entry Student-t-like cost LUT. The current LUT uses 128 `uint16` entries (256 bytes). The Python hybrid reference still computes observation distances in floating point before LUT lookup.
+## PC/server API
 
-### Bounded second-order decoding
-
-Fixed-lag references evaluate lags 16, 8, and 4, with smaller lags used in stress tests. Algorithmic score/backpointer accounting is explicit and excludes Python/container overhead. Synthetic stress testing is used to expose the memory/accuracy tradeoff rather than treating an easy generator as evidence of equivalence.
-
-### Integer-only runtime reference
-
-`IntegerEmissionRuntime` and `IntegerLag8Decoder` separate **model compilation** from **runtime**:
-
-- compilation from the Q4 research model may use floating point;
-- observations are pre-quantized to `int16`;
-- runtime emission distance, LUT indexing, transition scoring, score renormalization, predecessor storage, and second-order lag-8 decoding use integer arrays/arithmetic;
-- float-to-int input conversion is a preprocessing convenience and is explicitly excluded from the integer-runtime claim.
-
-The current accounting target for the lag-8 compiled reference is **510 bytes of persistent integer tables + 272 bytes of algorithmic runtime buffers = 782 bytes of core data**, excluding firmware, stack, allocator/Python overhead, I/O buffers and platform-specific data. This is a reference accounting result, not yet a measured ESP32/STM32 firmware footprint.
-
-A repository-native benchmark is provided at:
+Install the server extras:
 
 ```bash
-python -m benchmarks.edge.integer_lag8
+python -m pip install -e ".[server]"
 ```
 
-During independent reconstruction of the current algorithm, a 20-seed noisy synthetic study produced approximately **95.544%** mean accuracy for the hybrid Q4/LUT-128 lag-8 reference and **95.536%** for the integer lag-8 reference, with **99.728%** mean path agreement. These are development findings, not repository-native benchmark results, until reproduced from a complete checkout.
+Run the API:
 
-### C++17 / ESP32 target path
-
-A dependency-free C++17 fixed-array kernel is available under `cpp/`. The host parity test uses the same deterministic 24-observation vector as the Python integer reference.
-
-The first ESP32 target harness is under `cpp/esp32/` and is configured for PlatformIO + Arduino on a generic `esp32dev` board. It performs deterministic parity first and then measures target-side latency with `micros()`, while reporting `sizeof(IntegerLag8Model)` and `sizeof(IntegerLag8Kernel)`.
-
-No ESP32 timing, flash, RAM or energy claim is made yet. The current development environment does not provide the ESP32/PlatformIO toolchain, so these measurements remain a target-hardware gate.
-
-## Scientific status
-
-Synthetic benchmarks are controlled experiments. They are useful for regression, ablation, quantization error, bounded-memory behavior and stress testing, but they are not real-world validation. External datasets and hardware measurements must be reported separately.
-
-## Edge roadmap
-
-```text
-Python reference
-    ↓
-Compact-Robust 119
-    ↓
-Q4
-    ↓
-LUT-128
-    ↓
-bounded backtrace 16 / 8 / 4
-    ↓
-integer-only runtime reference
-    ↓
-C/C++ kernel
-    ↓
-ESP32 / STM32 target harness
-    ↓
-target RAM / Flash / latency / energy benchmark
-    ↓
-real sensor/control experiment
+```bash
+uvicorn resolutive_inference.server_app:app --host 0.0.0.0 --port 8000
 ```
 
-A future physical experiment will evaluate a bounded adaptive controller where an ADC measurement is used to tune a PWM/frequency command toward a maximum-response operating point. Hardware work is not part of the current pre-alpha validation.
+The server surface includes:
+
+- health and model information endpoints;
+- model registration with immutable version history;
+- single and batch inference;
+- stateful sessions;
+- incremental `integer_lag8` sessions;
+- WebSocket transport for sessions;
+- optional API-key protection through `RESOLUTIVE_API_KEY`;
+- optional JSON model persistence through `RESOLUTIVE_MODEL_STORE`;
+- bounded compiled-engine cache keyed by model content.
+
+See `docs/server_api.md` for the current HTTP/WebSocket contract and deployment notes.
+
+## Controlled benchmark results
+
+All numbers below are repository-native GitHub Actions measurements and are limited to the stated configuration.
+
+### Server latency
+
+On GitHub-hosted Ubuntu / Python 3.12, the precompiled `integer_lag8` reference measured approximately **1.51 ms per 24-observation sequence** at the direct Python runtime layer. REST and WebSocket add application/serialization overhead; they are benchmarked separately under `benchmarks/server/`.
+
+### Single-process load
+
+Using `httpx.ASGITransport`, one ASGI process, a warmed engine cache, 200 requests per level and sequence length 24:
+
+- concurrency 1: **371.9 req/s**, p50 2.63 ms, p95 2.86 ms, 0 errors;
+- concurrency 4: **256.2 req/s**, p50 14.56 ms, p95 23.09 ms, 0 errors;
+- concurrency 16: **257.1 req/s**, p50 57.48 ms, p95 83.05 ms, 0 errors;
+- concurrency 32: **267.1 req/s**, p50 107.43 ms, p95 145.18 ms, 0 errors.
+
+Across all four levels, **800/800 requests succeeded**. This is an in-process application benchmark, not a production network SLA.
+
+### HMM controls
+
+A 20-seed × 1000-observation known-parameter synthetic comparison produced:
+
+| Scenario | CompactRobust119 | Gaussian HMM | Student-t HMM |
+|---|---:|---:|---:|
+| First-order Gaussian accuracy | **99.52%** | 99.21% | 98.79% |
+| Second-order + 8% contamination accuracy | **98.56%** | 95.35% | 96.93% |
+| Median runtime in contaminated scenario | **23.94 µs/obs** | 43.63 µs/obs | 52.93 µs/obs |
+
+Persistent counts in that comparison are 119 stored statistics for CompactRobust119, 72 parameters for Gaussian HMM and 73 for Student-t HMM.
+
+These results establish an observed advantage only for the tested synthetic known-parameter scenarios. They must not be generalized to all sequential-inference workloads.
 
 ## Reproducibility
 
-Experiments should use explicit seeds and record configuration, metrics and assumptions. Current Edge entry points include:
+Run Python validation with:
 
 ```bash
-python -m benchmarks.edge.streaming_backtrace
-python -m benchmarks.edge.compact_robust_q4
-python -m benchmarks.edge.bounded_stress
-python -m benchmarks.edge.integer_lag8
+python -m pip install -e ".[dev]"
+python -m ruff check .
+python -m pytest
 ```
 
-Run tests and lint with:
+Useful benchmark entry points include:
 
 ```bash
-python -m pytest
-python -m ruff check .
+python -m benchmarks.server.latency
+python -m benchmarks.server.load
+python -m benchmarks.baselines.robust119
+python -m benchmarks.edge.integer_lag8
 ```
 
 Host C++ parity:
@@ -119,27 +116,40 @@ cmake --build cpp/build
 ctest --test-dir cpp/build --output-on-failure
 ```
 
-ESP32 target harness (when PlatformIO and target hardware are available):
+## Architecture boundary
 
-```bash
-cd cpp/esp32
-pio run
-pio run --target upload
-pio device monitor
+The intended composition is modular:
+
+```text
+Resolutive Inference core
+        ↓
+independent API
+        ↓
+apps / IoT / robots / services / metaverse integrations
 ```
+
+Consumers should be able to use the API independently. Integrations must not require a private metaverse-only contract.
+
+## Edge status
+
+The C++17 fixed-array kernel and ESP32 target harness remain in the repository as an experimental path. No current release claim is made for ESP32 latency, flash, RAM or energy because those require target-hardware measurements.
+
+## Scientific status
+
+Synthetic benchmarks are controlled experiments useful for regression, ablation, approximation and stress testing. They are not real-world validation. External datasets and target hardware measurements should be reported separately when available.
 
 ## Resolutive compatibility
 
 RSMS compatibility: **1.0-rc.1**.
 
-New terminology or mathematical conventions should first be checked against the central `resolutive-science` specification to avoid incompatible project dialects.
-
 ## License
 
-This repository uses the **Resolutive Research Non-Commercial License (RRNCL) 1.0**. Academic, educational and non-commercial research use is permitted under the license terms, including qualifying use by universities, schools, public research institutions, non-profit organizations and NGOs. Commercial exploitation or use supporting commercial advantage requires separate written authorization or a commercial license. Because commercial use is restricted, the project is source-available and must not be represented as OSI-approved open-source software.
+This repository uses the **Resolutive Research Non-Commercial License (RRNCL) 1.0**. Academic, educational and non-commercial research use is permitted under the license terms, including qualifying use by universities, schools, public research institutions, non-profit organizations and NGOs. Commercial exploitation or use supporting commercial advantage requires separate written authorization or a commercial license.
+
+Because commercial use is restricted, this project is **source-available** and must not be represented as OSI-approved open-source software.
 
 See `LICENSE` for the complete terms.
 
 ## Citation
 
-See `CITATION.cff` for author and citation metadata.
+See `CITATION.cff`. Cite the exact release or commit used.

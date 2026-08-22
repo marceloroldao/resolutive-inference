@@ -1,0 +1,28 @@
+name: Server load benchmark
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "benchmarks/server/load.py"
+      - "tests/test_server_load_benchmark.py"
+      - "src/resolutive_inference/api.py"
+      - "src/resolutive_inference/engine_cache.py"
+      - ".github/workflows/server-load.yml"
+  workflow_dispatch:
+
+jobs:
+  load:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install project and development dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+      - name: Run concurrent server load benchmark
+        run: python -m benchmarks.server.load --requests 200 --length 24 --concurrency 1,4,16,32

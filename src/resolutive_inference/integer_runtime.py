@@ -51,7 +51,7 @@ class IntegerEmissionRuntime:
         inv_variances_q = np.rint(inv_variances * inverse_variance_scale)
         inv_variances_q = np.clip(inv_variances_q, 1, 65535).astype(np.uint16)
 
-        max_distance_q = int(round(lut.max_distance * observation_scale * observation_scale))
+        max_distance_q = round(lut.max_distance * observation_scale * observation_scale)
         if max_distance_q <= 0:
             raise ValueError("compiled maximum distance must be positive")
 

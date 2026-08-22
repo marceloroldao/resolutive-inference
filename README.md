@@ -136,7 +136,7 @@ New terminology or mathematical conventions should first be checked against the 
 
 ## License
 
-This repository uses the **Resolutive Research Non-Commercial License (RRNCL) 1.0**. Academic, educational, and research use is permitted under the license terms; commercial exploitation requires separate commercial authorization/licensing. Because of the commercial-use restriction, this should not be described simply as OSI Open Source.
+This repository uses the **Resolutive Research Non-Commercial License (RRNCL) 1.0**. Academic, educational and non-commercial research use is permitted under the license terms, including qualifying use by universities, schools, public research institutions, non-profit organizations and NGOs. Commercial exploitation or use supporting commercial advantage requires separate written authorization or a commercial license. Because commercial use is restricted, the project is source-available and must not be represented as OSI-approved open-source software.
 
 See `LICENSE` for the complete terms.
 

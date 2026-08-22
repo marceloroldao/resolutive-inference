@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "resolutive-inference"
-version = "0.1.0"
-description = "Experimental compact sequential inference engine"
+version = "0.2.0rc1"
+description = "Experimental compact sequential inference engine with PC/server API"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "LicenseRef-RRNCL-1.0"

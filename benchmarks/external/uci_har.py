@@ -163,7 +163,7 @@ def _evaluate_compact(
 
 
 def _evaluate_hmm(
-    model_factory: type[GaussianHMM] | type[StudentTHMM],
+    model_factory: type[GaussianHMM | StudentTHMM],
     template: GaussianHMM | StudentTHMM,
     x: np.ndarray,
     y: np.ndarray,

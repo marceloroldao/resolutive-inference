@@ -1,97 +1,145 @@
 # Resolutive Inference
 
-Resolutive Inference is an experimental, compact engine for sequential inference. The project studies whether deliberately small state-space models can provide interpretable, reproducible baselines for filtering, regime inference, anomaly scoring, and compressed representation of time series.
+**Experimental compact sequential inference for auditable Edge research.**
 
-The project does **not** claim general superiority over neural networks. Neural sequence models can be substantially more expressive and may be the appropriate choice when data, compute, and task complexity justify them. This repository instead investigates a narrower engineering and scientific question: what can be achieved with a small, inspectable inference state and an explicitly controlled statistical budget?
+> Maturity: **pre-alpha / experimental**. Results are exploratory unless a repository-native benchmark and its configuration are explicitly cited.
 
-## Research lines
+## Scope
 
-- **Compact-Pro** is the first reference implementation. Its intended operating point is approximately **119 learned parameters or maintained statistics**, depending on the configured state and observation dimensions. The exact count must be reported for every experiment rather than treated as a universal constant.
-- **Compact-Robust** is a future experimental line aimed at heavy-tailed observations, contamination, and distribution shift. The current module is an explicit placeholder and is not presented as a validated method.
+`resolutive-inference` investigates compact sequential models for filtering, latent-regime inference, anomaly-sensitive temporal processing, and resource-constrained Edge deployment. The project emphasizes deterministic experiments, explicit state transitions, small model footprints, quantization, and reproducible comparisons with conventional baselines.
 
-## Baselines
+This repository does **not** claim that Resolutive Inference generally replaces neural networks or that it is universally superior to HMM, Semi-Markov, or other statistical models.
 
-Benchmark comparisons will include conventional hidden Markov models (HMMs) and HMMs with Student-t emissions. Comparisons must use matched data splits, clearly documented parameter counts, repeated seeds, and uncertainty estimates. Neural baselines may be added when appropriate, but no comparison should imply a general architectural ranking beyond the evaluated tasks and budgets.
+## Current references
 
-## Relationship to Resolutive Science
+### Compact-Pro
 
-`resolutive-science` is the normative source of truth for shared Resolutive Science terminology, notation and scientific-status conventions.
+`CompactPro` is the initial Gaussian state-space research baseline. It keeps the public API small and separates emissions, transitions, quantization, metrics, and experiment orchestration.
 
-- Resolutive Science repository baseline: `v0.1.1`
-- RSMS compatibility: `1.0-rc.1` — candidate compatibility, subject to re-audit when RSMS 1.0 becomes stable
-- Project governance baseline: `RSPS 1.0-draft`
+### Compact-Robust 119
 
-Resolutive Inference is an independently testable computational project. Resolutive terminology used here is an engineering abstraction unless a direct mathematical dependency on RSMS is explicitly identified. Computational benchmark success does not constitute validation of Resolutive Physics.
+The current Edge research branch defines a fixed four-state, seven-feature second-order reference with exactly **119 stored scalar statistics**:
 
-## Layout
+- 28 means;
+- 7 shared variances;
+- 16 first-order transition probabilities;
+- 64 second-order transition probabilities;
+- 4 initial probabilities.
+
+Its Q4 payload is **476 bits = 59.5 theoretical bytes**, requiring 60 whole bytes with ideal nibble packing. This number is the quantized payload only; scale/offset metadata, LUTs, runtime buffers, firmware, stack, allocator overhead, input buffers, and platform-specific structures are separate.
+
+### Hybrid Q4 + LUT-128
+
+The Q4 reference may use a 128-entry Student-t-like cost LUT. The current LUT uses 128 `uint16` entries (256 bytes). The Python hybrid reference still computes observation distances in floating point before LUT lookup.
+
+### Bounded second-order decoding
+
+Fixed-lag references evaluate lags 16, 8, and 4, with smaller lags used in stress tests. Algorithmic score/backpointer accounting is explicit and excludes Python/container overhead. Synthetic stress testing is used to expose the memory/accuracy tradeoff rather than treating an easy generator as evidence of equivalence.
+
+### Integer-only runtime reference
+
+`IntegerEmissionRuntime` and `IntegerLag8Decoder` separate **model compilation** from **runtime**:
+
+- compilation from the Q4 research model may use floating point;
+- observations are pre-quantized to `int16`;
+- runtime emission distance, LUT indexing, transition scoring, score renormalization, predecessor storage, and second-order lag-8 decoding use integer arrays/arithmetic;
+- float-to-int input conversion is a preprocessing convenience and is explicitly excluded from the integer-runtime claim.
+
+The current accounting target for the lag-8 compiled reference is **510 bytes of persistent integer tables + 272 bytes of algorithmic runtime buffers = 782 bytes of core data**, excluding firmware, stack, allocator/Python overhead, I/O buffers and platform-specific data. This is a reference accounting result, not yet a measured ESP32/STM32 firmware footprint.
+
+A repository-native benchmark is provided at:
+
+```bash
+python -m benchmarks.edge.integer_lag8
+```
+
+During independent reconstruction of the current algorithm, a 20-seed noisy synthetic study produced approximately **95.544%** mean accuracy for the hybrid Q4/LUT-128 lag-8 reference and **95.536%** for the integer lag-8 reference, with **99.728%** mean path agreement. These are development findings, not repository-native benchmark results, until reproduced from a complete checkout.
+
+### C++17 / ESP32 target path
+
+A dependency-free C++17 fixed-array kernel is available under `cpp/`. The host parity test uses the same deterministic 24-observation vector as the Python integer reference.
+
+The first ESP32 target harness is under `cpp/esp32/` and is configured for PlatformIO + Arduino on a generic `esp32dev` board. It performs deterministic parity first and then measures target-side latency with `micros()`, while reporting `sizeof(IntegerLag8Model)` and `sizeof(IntegerLag8Kernel)`.
+
+No ESP32 timing, flash, RAM or energy claim is made yet. The current development environment does not provide the ESP32/PlatformIO toolchain, so these measurements remain a target-hardware gate.
+
+## Scientific status
+
+Synthetic benchmarks are controlled experiments. They are useful for regression, ablation, quantization error, bounded-memory behavior and stress testing, but they are not real-world validation. External datasets and hardware measurements must be reported separately.
+
+## Edge roadmap
 
 ```text
-src/resolutive_inference/   Core inference components
-benchmarks/synthetic/       Controlled synthetic benchmarks
-benchmarks/baselines/       HMM and Student-t HMM baselines
-experiments/                Compression, robustness, and validation studies
-tests/                      Automated checks
-docs/                       Architecture, methodology, and benchmark protocol
-results/                    Generated tables and figures (not source evidence)
-examples/                   Minimal usage examples
+Python reference
+    ↓
+Compact-Robust 119
+    ↓
+Q4
+    ↓
+LUT-128
+    ↓
+bounded backtrace 16 / 8 / 4
+    ↓
+integer-only runtime reference
+    ↓
+C/C++ kernel
+    ↓
+ESP32 / STM32 target harness
+    ↓
+target RAM / Flash / latency / energy benchmark
+    ↓
+real sensor/control experiment
 ```
 
-## Quick start
-
-```bash
-python -m pip install -e .
-python -m pytest
-```
-
-Run the initial known-parameter synthetic benchmark with:
-
-```bash
-python benchmarks/synthetic/run.py --length 1000 --seed 2026
-```
-
-The command emits machine-readable JSON containing the seed, sequence length, state accuracy, negative log likelihood, Brier score, change-detection summary, and exact stored-statistic count.
+A future physical experiment will evaluate a bounded adaptive controller where an ADC measurement is used to tune a PWM/frequency command toward a maximum-response operating point. Hardware work is not part of the current pre-alpha validation.
 
 ## Reproducibility
 
-Every reported result should record the code revision, environment, configuration, random seeds, dataset provenance and checksum, split construction, fitted parameter/statistic count, runtime budget, and evaluation metrics. Experiments should preserve raw per-run measurements and summarize repeated trials with uncertainty intervals. See `docs/benchmark_protocol.md`.
+Experiments should use explicit seeds and record configuration, metrics and assumptions. Current Edge entry points include:
 
-## Status
+```bash
+python -m benchmarks.edge.streaming_backtrace
+python -m benchmarks.edge.compact_robust_q4
+python -m benchmarks.edge.bounded_stress
+python -m benchmarks.edge.integer_lag8
+```
 
-**Maturity:** pre-alpha / early research scaffold.
+Run tests and lint with:
 
-APIs, algorithms, and claims are expected to change as evidence accumulates. This maturity designation should be retained until a reproducible release gate, frozen benchmark protocol and publication-readiness review are completed.
+```bash
+python -m pytest
+python -m ruff check .
+```
 
-### Edge reference status
+Host C++ parity:
 
-`FixedPointViterbi` is a **hybrid quantized reference**: path scores, transition scores, and its LUT are integer-valued, while emission distances are still calculated in floating point. It is therefore not yet an integer-only fixed-point MCU kernel.
+```bash
+cmake -S cpp -B cpp/build
+cmake --build cpp/build
+ctest --test-dir cpp/build --output-on-failure
+```
 
-The current 3-state/1D edge command is only a preliminary streaming and bounded-backtrace benchmark. It is not a reproduction of the approximately 119-value Compact-Robust reference configuration.
+ESP32 target harness (when PlatformIO and target hardware are available):
 
-### Roadmap
+```bash
+cd cpp/esp32
+pio run
+pio run --target upload
+pio device monitor
+```
 
-The next implementation milestone is the **Compact-Robust 119-value reference**, in this order:
+## Resolutive compatibility
 
-1. Q4 quantization;
-2. LUT-128;
-3. bounded backtrace at depths 16, 8, and 4;
-4. integer-only emission calculation; and
-5. a C/C++ MCU kernel.
+RSMS compatibility: **1.0-rc.1**.
 
-## Licensing
+New terminology or mathematical conventions should first be checked against the central `resolutive-science` specification to avoid incompatible project dialects.
 
-This repository is **source-available** under the **Resolutive Research and Non-Commercial License (RRNCL) v1.0** in `LICENSE`.
+## License
 
-Academic research, scientific research, education, teaching, personal experimentation and other genuinely non-commercial research uses are permitted. Universities, schools, public research institutions, non-profit organizations and NGOs may also use the work under these terms when the use is non-commercial and does not support commercial advantage.
+This repository uses the **Resolutive Research Non-Commercial License (RRNCL) 1.0**. Academic, educational and non-commercial research use is permitted under the license terms, including qualifying use by universities, schools, public research institutions, non-profit organizations and NGOs. Commercial exploitation or use supporting commercial advantage requires separate written authorization or a commercial license. Because commercial use is restricted, the project is source-available and must not be represented as OSI-approved open-source software.
 
-Commercial use is **not granted** by the public license. Use in paid products or services, SaaS, proprietary integrations, consulting deliverables, monetized redistribution, production systems or internal business operations supporting commercial advantage requires separate written commercial authorization from the rights holder.
-
-Because commercial use is restricted, this project must not be represented as OSI-approved open-source software.
+See `LICENSE` for the complete terms.
 
 ## Citation
 
-Citation metadata is provided in `CITATION.cff`. Cite the exact commit or future release used.
-
-## Author
-
-Marcelo Roldão Matos  
-ORCID: 0009-0003-6075-4680
+See `CITATION.cff` for author and citation metadata.

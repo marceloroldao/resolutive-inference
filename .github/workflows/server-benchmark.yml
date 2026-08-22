@@ -5,7 +5,12 @@ on:
     branches: [main]
     paths:
       - "benchmarks/server/**"
+      - "src/resolutive_inference/api.py"
+      - "src/resolutive_inference/engine_cache.py"
+      - "src/resolutive_inference/integer_runtime.py"
+      - "src/resolutive_inference/server_app.py"
       - "tests/test_server_benchmark.py"
+      - "tests/test_engine_cache.py"
       - ".github/workflows/server-benchmark.yml"
   workflow_dispatch:
 

@@ -48,9 +48,19 @@ def _download_and_extract(cache_dir: Path) -> Path:
     with zipfile.ZipFile(archive) as handle:
         handle.extractall(cache_dir)
     root = _locate_root(cache_dir)
-    if root is None:
-        raise FileNotFoundError("UCI HAR train/test files were not found after extraction")
-    return root
+    if root is not None:
+        return root
+    nested_archives = [path for path in cache_dir.rglob("*.zip") if path != archive]
+    for nested in nested_archives:
+        try:
+            with zipfile.ZipFile(nested) as handle:
+                handle.extractall(nested.parent)
+        except zipfile.BadZipFile:
+            continue
+        root = _locate_root(cache_dir)
+        if root is not None:
+            return root
+    raise FileNotFoundError("UCI HAR train/test files were not found after nested extraction")
 
 
 def _load_split(root: Path, split: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:

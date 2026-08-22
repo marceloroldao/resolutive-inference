@@ -8,8 +8,9 @@ version = "0.1.0"
 description = "Experimental compact sequential inference engine"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
-authors = [{ name = "Resolutive Inference contributors" }]
+license = "LicenseRef-RRNCL-1.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Marcelo Roldão Matos" }]
 dependencies = ["numpy>=1.26"]
 
 [project.optional-dependencies]

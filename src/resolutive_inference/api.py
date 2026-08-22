@@ -12,8 +12,7 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from .compact_robust import CompactRobust119
-from .edge_compact import Q4CompactRobust119, StudentTCostLUT
-from .integer_runtime import IntegerLag8Decoder
+from .engine_cache import DEFAULT_ENGINE_CACHE
 from .model_store import JsonModelStore
 
 EngineName = Literal["float", "q4_lut128", "integer_lag8"]
@@ -152,13 +151,8 @@ def _decode_observations(
 
     if engine == "float":
         return model.decode(observations)
-
-    q4 = Q4CompactRobust119.from_model(model)
-    lut = StudentTCostLUT.build(128, degrees_of_freedom=model.degrees_of_freedom)
-    if engine == "q4_lut128":
-        return q4.decode(observations, lut=lut)
-    if engine == "integer_lag8":
-        return IntegerLag8Decoder.compile(q4, lut, lag=8).decode_from_float(observations)
+    if engine in ("q4_lut128", "integer_lag8"):
+        return DEFAULT_ENGINE_CACHE.decode(model, observations, engine)
     raise ValueError(f"unsupported engine: {engine}")
 
 
@@ -189,11 +183,18 @@ def create_app(
 
     @app.get("/v1/info")
     def info() -> dict[str, object]:
+        cache = DEFAULT_ENGINE_CACHE.stats()
         return {
             "api_version": "0.1.0-dev",
             "maturity": "pre-alpha",
             "engines": SUPPORTED_ENGINES,
             "persistence": "json-versioned" if isinstance(registry, PersistentRegistry) else "process-memory",
+            "engine_cache": {
+                "entries": cache.entries,
+                "hits": cache.hits,
+                "misses": cache.misses,
+                "max_entries": cache.max_entries,
+            },
             "limits": {
                 "max_batch_sequences": MAX_BATCH_SEQUENCES,
                 "max_sequence_length": MAX_SEQUENCE_LENGTH,

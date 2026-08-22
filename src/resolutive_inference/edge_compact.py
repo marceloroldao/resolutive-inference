@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from .compact_robust import CompactRobust119, OBSERVATION_DIM
+from .compact_robust import OBSERVATION_DIM, CompactRobust119
 
 
 @dataclass(frozen=True)

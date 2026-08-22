@@ -1,0 +1,27 @@
+name: External UCI HAR benchmark
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "benchmarks/external/**"
+      - "src/resolutive_inference/**"
+      - ".github/workflows/external-uci-har.yml"
+  workflow_dispatch:
+
+jobs:
+  uci-har:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install project
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+      - name: Run external UCI HAR benchmark
+        run: python -m benchmarks.external.uci_har --cache-dir .cache/uci-har

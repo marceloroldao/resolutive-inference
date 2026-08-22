@@ -28,16 +28,28 @@ ACTIVITIES = {1: 0, 4: 1, 5: 2, 6: 3}  # walking, sitting, standing, laying
 FEATURE_COUNT = 7
 
 
+def _locate_root(cache_dir: Path) -> Path | None:
+    for candidate in cache_dir.rglob("X_train.txt"):
+        if candidate.parent.name == "train":
+            root = candidate.parent.parent
+            if (root / "test" / "X_test.txt").exists():
+                return root
+    return None
+
+
 def _download_and_extract(cache_dir: Path) -> Path:
-    root = cache_dir / "UCI HAR Dataset"
-    if root.exists():
-        return root
+    existing = _locate_root(cache_dir)
+    if existing is not None:
+        return existing
     cache_dir.mkdir(parents=True, exist_ok=True)
     archive = cache_dir / "uci_har.zip"
     if not archive.exists():
         urllib.request.urlretrieve(DATASET_URL, archive)
     with zipfile.ZipFile(archive) as handle:
         handle.extractall(cache_dir)
+    root = _locate_root(cache_dir)
+    if root is None:
+        raise FileNotFoundError("UCI HAR train/test files were not found after extraction")
     return root
 
 
